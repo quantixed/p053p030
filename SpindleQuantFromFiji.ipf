@@ -533,11 +533,12 @@ STATIC Function GreenRedBiPlots(w0,w1)
 	ModifyGraph/W=$plotName arrowMarker={_inline_,1,3,1.5,6,barbSharp= 1}
 	ModifyGraph/W=$plotName rgb=(0,0,0,32768)
 	ModifyGraph/W=$plotName mrkThick=0
-	SetAxis/W=$plotName left 0,1;DelayUpdate
+	SetAxis/W=$plotName left 0,1
 	SetAxis/W=$plotName bottom 0,1
 	ModifyGraph/W=$plotName width={Aspect,1}
 	ModifyGraph/W=$plotName grid=1,mirror=1
 	ModifyGraph/W=$plotName gridRGB=(48059,48059,48059)
+	ModifyGraph/W=$plotName manTick(left)={1,1,0,0},manMinor(left)={3,0},manTick(bottom)={1,1,0,0},manMinor(bottom)={3,0}
 //	Label/W=$plotName left "Red"
 	ModifyGraph/W=$plotName axRGB(left)=(hexcolor_red(0xED1C24),hexcolor_green(0xED1C24),hexcolor_blue(0xED1C24))
 	ModifyGraph/W=$plotName tlblRGB(left)=(hexcolor_red(0xED1C24),hexcolor_green(0xED1C24),hexcolor_blue(0xED1C24))
