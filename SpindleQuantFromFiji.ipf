@@ -502,11 +502,8 @@ Function MakeTheBiPlots()
 		Wave w0 = $wName
 		Wave w1 = $(RemoveEnding(wName) + "2")
 		newName2 = ReplaceString("_tern",wName,"_bi")
-//		newName3 = RemoveEnding(newName2) + "2"
-//		Make/O/N=(numpnts(w0)) $newName2, $newName3
 		Make/O/N=(numpnts(w0)) $newName2
 		Wave w2 = $newName2
-//		Wave w3 = $newName3
 		w2[] = w0[p] / (w0[p] + w1[p])
 	endfor
 	
@@ -517,21 +514,35 @@ Function MakeTheBiPlots()
 		wName = StringFromList(i,wList)
 		Wave w0 = $wName
 		Wave w1 = $(ReplaceString("_biGreen0",wName,"_biRed0"))
-		GreenRedBiPlots(w0,w1)
+		// make the average wave
+		Make/O/N=(2,2) $(ReplaceString("_biGreen0",wName,"_biAve0"))
+		Wave w2 = $(ReplaceString("_biGreen0",wName,"_biAve0"))
+		Make/FREE/N=(numpnts(w0)/3) tempW
+		tempW[] = w0[p*3] // green pre
+		w2[0][0] = mean(tempW)
+		tempW[] = w1[p*3] // red pre
+		w2[0][1] = mean(tempW)
+		tempW[] = w0[p*3 + 1] // green post
+		w2[1][0] = mean(tempW)
+		tempW[] = w1[p*3 + 1] // red post
+		w2[1][1] = mean(tempW)
+		GreenRedBiPlots(w0,w1,w2)
 	endfor
 	
 	SetDataFolder root:
 End
 
-STATIC Function GreenRedBiPlots(w0,w1)
-	Wave w0,w1
+STATIC Function GreenRedBiPlots(w0,w1,w2)
+	Wave w0,w1,w2
 	
 	String plotName = "p4_" + NameOfWave(w1)
 	KillWindow/Z $plotName
 	Display/N=$plotName/HIDE=1 w1 vs w0 // green vs red
+	AppendToGraph/W=$plotName w2[][1]/TN=aveArrow vs w2[][0]
 	ModifyGraph/W=$plotName mode=4
 	ModifyGraph/W=$plotName arrowMarker={_inline_,1,3,1.5,6,barbSharp= 1}
 	ModifyGraph/W=$plotName rgb=(0,0,0,32768)
+	ModifyGraph/W=$plotName rgb(aveArrow)=(245*257,147*257,49*257)
 	ModifyGraph/W=$plotName mrkThick=0
 	SetAxis/W=$plotName left 0,1
 	SetAxis/W=$plotName bottom 0,1
@@ -539,18 +550,16 @@ STATIC Function GreenRedBiPlots(w0,w1)
 	ModifyGraph/W=$plotName grid=1,mirror=1
 	ModifyGraph/W=$plotName gridRGB=(48059,48059,48059)
 	ModifyGraph/W=$plotName manTick(left)={1,1,0,0},manMinor(left)={3,0},manTick(bottom)={1,1,0,0},manMinor(bottom)={3,0}
-//	Label/W=$plotName left "Red"
 	ModifyGraph/W=$plotName axRGB(left)=(hexcolor_red(0xED1C24),hexcolor_green(0xED1C24),hexcolor_blue(0xED1C24))
 	ModifyGraph/W=$plotName tlblRGB(left)=(hexcolor_red(0xED1C24),hexcolor_green(0xED1C24),hexcolor_blue(0xED1C24))
 	ModifyGraph/W=$plotName alblRGB(left)=(hexcolor_red(0xED1C24),hexcolor_green(0xED1C24),hexcolor_blue(0xED1C24))
-//	Label/W=$plotName bottom "Green"
 	ModifyGraph/W=$plotName axRGB(bottom)=(hexcolor_red(0x00A651),hexcolor_green(0x00A651),hexcolor_blue(0x00A651))
 	ModifyGraph/W=$plotName tlblRGB(bottom)=(hexcolor_red(0x00A651),hexcolor_green(0x00A651),hexcolor_blue(0x00A651))
 	ModifyGraph/W=$plotName alblRGB(bottom)=(hexcolor_red(0x00A651),hexcolor_green(0x00A651),hexcolor_blue(0x00A651))
 	String splitStr = ReplaceString("_biGreen0",NameOfWave(w0),"")
 	splitStr = ReplaceString("_biRed0",splitStr,"")
 	String labelStr = "\\JR" + ReplaceString("_", splitStr, "\r")
-	TextBox/W=$plotName/C/N=text0/F=0/A=RB/X=0.00/Y=0.00/E=0 labelStr
+	TextBox/W=$plotName/B=1/C/N=text0/F=0/A=RB/X=0.00/Y=0.00/E=0 labelStr
 End
 
 ////////////////////////////////////////////////////////////////////////
@@ -680,3 +689,4 @@ End
 // From illustrator text used for figures is
 // Red 237,28,36 #ED1C24
 // Green 0,166,81 #00A651
+// RapamycinOrange is 245,147,49	
