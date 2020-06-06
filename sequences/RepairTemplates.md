@@ -2,9 +2,9 @@
 
 ## CLTA-FKBP-GFP
 
-* Left Homology Arm 1-918
+* Left Homology Arm 1-918
 * FKBP 928-1248
-* GFP 1267-1980
+* GFP 1267-1980
 * Right Homology Arm 1984-2499
 
 ```
@@ -54,8 +54,8 @@ GAGTTTAGTGGCTGAAGGTTAACCCCCTCATTATCTACC
 
 ## GFP-FKBP-TACC3
 
-* Left homology arm 35-777
-* GFP 778-1494
+* Left homology arm 35-777
+* GFP 778-1494
 * FKBP 1513-1833
 * Right homology arm 1864-2407
 
@@ -107,8 +107,8 @@ GCCGCTC
 ## chTOG-FKBP-GFP
 
 * Left homology arm 13-624
-* FKBP 634-957
-* GFP 973-1692
+* FKBP 634-957
+* GFP 973-1692
 * Right homology arm 1693-2315
 
 ```
