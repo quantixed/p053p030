@@ -57,7 +57,6 @@ findAxisLimit <- function(val1,val2){
   return(highVal)
 }
 axVal <- findAxisLimit(loVal,hiVal)
-theProtein <- theNames[3]
 
 # function to generate the plots
 makeTheScatterPlot <- function(preData, postData, yLab, xLab) {
@@ -66,7 +65,7 @@ makeTheScatterPlot <- function(preData, postData, yLab, xLab) {
     geom_point() +
     scale_x_continuous(trans='log2', limits = c(1/axVal,axVal), breaks = trans_breaks("log2", function(x) 2^x), labels = trans_format("log2", math_format(.x))) +
     scale_y_continuous(trans='log2', limits = c(1/axVal,axVal), breaks = trans_breaks("log2", function(x) 2^x), labels = trans_format("log2", math_format(.x))) +
-    labs(y = yLab, x = xLab) + 
+    labs(y = yLab, x = xLab) +
     theme(legend.position = 'none')
 }
 
