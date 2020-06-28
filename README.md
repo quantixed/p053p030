@@ -14,5 +14,6 @@ Code for p053p030
 
 ## Igor Code
 
+- `SpindleQuantFromFiji.ipf` this code will read all the outputs from `knocksideways_spindle.ijm`. Data should be organised as follows: cell lines in separate directories, sub-directories for each protein assessed by live knocksideways. Consistent naming is required. Point Igor at the the directory which contains the cell line directories.
 - `MitoticProgression.ipf` this code will read data from Excel workbooks. Data should be organised as follows: separate worksheets for the cells to be compared. Three columns per sheet labelled `NEB`, `Metaphase`, `Anaphase`. Each row is contains the frame number each cell reached these stages. Data used in the paper can be found in `Data/progression`
 
