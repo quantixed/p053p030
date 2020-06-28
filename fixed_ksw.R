@@ -32,6 +32,7 @@ combined_df <- subset(combined_df, Category != "tubulin control", select = theNa
 combined_df <- subset(combined_df, Category != "PI3KC2A control", select = theNames)
 combined_df <- subset(combined_df, Category != "tubulin rapamycin", select = theNames)
 combined_df <- subset(combined_df, Category != "PI3KC2A rapamycin", select = theNames)
+# combined_df should have these names, but earlier script named 3rd column differently
 names(combined_df) <- c("Category","blind_list","GFP_spindle_ratio","POI_spindle_ratio")
 
 ## Statistics
