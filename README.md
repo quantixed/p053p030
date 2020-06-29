@@ -4,6 +4,7 @@ Code and data for Ryan et al. manuscript`#p053p030`
 ## Data
 
 - `fixed_ksw` contains the outputs from Fiji (in `Fiji_outputs`) and the resulting data frames (in `R_combined`) to generate the plots in the paper.
+-  `live_ksw` contains the outputs from Fiji (`knocksideways_spindle.ijm`). Organised by cell line, these csv files can be used to generate ternary diagrams and arrow plots for live knocksideways experiments using `SpindleQuantFromFiji.ipf`.
 - `progression` has mitotic progression data for all cell lines
 - `sequences` directory contains the DNA sequences of the plasmids used introducing GFP-FKBP tags during gene editing.
 
