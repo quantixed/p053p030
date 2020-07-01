@@ -1,0 +1,17 @@
+file,type,time,measure
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,spindle green,0,7997.0245
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,cyto green,0,4640.4802
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,mito green,0,4370.5128
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,cell green,0,4715.9295
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,spindle red,0,1469.3271
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,cyto red,0,1152.8323
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,mito red,0,827.7659
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-01.tif,cell red,0,1071.8488
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,spindle green,1,2440.1712
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,cyto green,1,1602.4824
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,mito green,1,7165.9824
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,cell green,1,2894.6304
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,spindle red,1,906.9792
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,cyto red,1,657.9584
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,mito red,1,1207.4441
+HeLa_CLTA-FKBP-GFP_GTSE1_wt_006-7.tif,cell red,1,881.1824
