@@ -1,13 +1,19 @@
 # p053p030
 Code and data for Ryan et al. manuscript`#p053p030`
 
+**Defining endogenous TACC3–chTOG–clathrin–GTSE1 interactions at the mitotic spindle using induced relocalization**
+
+Ellis L Ryan, James Shelford, Teresa Massam-Wu, Richard Bayliss, Stephen J Royle
+
+*bioRxiv* [2020.07.01.181818](https://doi.org/10.1101/2020.07.01.181818)
+
 ## Data
 
-- `fixed_ksw` contains the outputs from Fiji (in `Fiji_outputs`) and the resulting data frames (in `R_combined`) to generate the plots in the paper.
 -  `live_ksw` contains the outputs from Fiji (`knocksideways_spindle.ijm`). Organised by cell line, these csv files can be used to generate ternary diagrams and arrow plots for live knocksideways experiments using `SpindleQuantFromFiji.ipf`.
 - `progression` has mitotic progression data for all cell lines
 - `sequences` directory contains the DNA sequences of the plasmids used introducing GFP-FKBP tags during gene editing.
 
+Data for R plots are in the `R` directory.
 
 
 ## Fiji Code
@@ -22,8 +28,10 @@ Code and data for Ryan et al. manuscript`#p053p030`
 
 ## R Code
 
-- `ProcessFijiDataset.R` is a script to process the outputs from spindle measurements in Fiji. The images are blinded and require unblinding with a `log.txt` file in the same directory as the files.
+Three R projects to generate plots in the paper.
 
-- `fixed_ksw.R` is a script to process combined dataframes that are outputs from `fiji_ksw.R`. All data frames for one cell line  should be in `.rds` format and grouped in a directory named according to the cell line.
+- `fixed_ksw_figure` 
+- `gtse1_lidl_figure`
+- `gtse1_fragment_figure`
 
-A further file, `lookup.csv` is required to run the code.
+All work in a similar way. Data (outputs from Fiji) are in the `Data` directory and can be processed experiment-by-experiment or cell line by cell line to generate dataframes that are saved to `Output/Data`. A further script then calculates the statistics and plots the data.
