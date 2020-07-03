@@ -1,8 +1,13 @@
 # Script to process multiple csv files containing output from Fiji
 # Written by James Shelford, generalised by Stephen Royle
 
-# make directory for output if it doesn't exist
-if (dir.exists("output") == FALSE) dir.create("output")
+# wd should be fixed_ksw_figure
+# setup preferred directory structure in wd
+ifelse(!dir.exists("Data"), dir.create("Data"), "Folder exists already")
+ifelse(!dir.exists("Output"), dir.create("Output"), "Folder exists already")
+ifelse(!dir.exists("Output/Data"), dir.create("Output/Data"), "Folder exists already")
+ifelse(!dir.exists("Output/Plots"), dir.create("Output/Plots"), "Folder exists already")
+ifelse(!dir.exists("Script"), dir.create("Script"), "Folder exists already")
 
 # select directory that contains the csv files (name of this folder is reused later)
 datadir <- rstudioapi::selectDirectory()
@@ -82,7 +87,7 @@ df1$blind_list <- blind_list
 
 # load the log.txt file
 logfile_path <- paste0(datadir,"/log.txt")
-blind_log <- read.table(logfile_path, header = TRUE)
+blind_log <- read.delim(logfile_path, header = TRUE)
 
 # function to find partial strings in a column and classify them
 add_categories = function(x, patterns, replacements = patterns, fill = NA, ...) {
@@ -97,8 +102,8 @@ add_categories = function(x, patterns, replacements = patterns, fill = NA, ...) 
   return(ans)
 }
 
-#Load the look-up table
-look_up_table <- read.table("lookup.csv", header = TRUE, stringsAsFactors = FALSE, sep = ",")
+# load external look-up table
+look_up_table <- read.table("Data/lookup.csv", header = TRUE, stringsAsFactors = FALSE, sep = ",")
 
 # add a new column to dataframe where categories are defined by searching original name for partial strings
 blind_log$Category <- add_categories(blind_log$Original_Name,
@@ -115,8 +120,12 @@ df1$Category <- with(blind_log,
 # a) blind_log is in a random order
 # b) your list of *.csv names could be in any order (although they're probably sorted alphanumerically)
 
+cellLineName <- basename(dirname(datadir))
+pathToDataSave <-  paste0("Output/Data/", cellLineName, "/")
+ifelse(!dir.exists(pathToDataSave), dir.create(pathToDataSave), "Folder exists already")
+
 # Now save the dataset the name will be the folderName that the csvs were in
 folderName <- basename(datadir)
-fileName <- paste0("./output/dataframe_", folderName, ".rds")
+fileName <- paste0(pathToDataSave, "dataframe_", folderName, ".rds")
 saveRDS(df1, file=fileName)
 

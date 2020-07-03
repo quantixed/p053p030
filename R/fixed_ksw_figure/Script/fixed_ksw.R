@@ -9,10 +9,12 @@ library(multcomp)
 library(scales)
 library(cowplot)
 
-# make directory for output if it doesn't exist
-if (dir.exists("output")==FALSE) dir.create("output")
+# make directory for plots if it doesn't exist (it should)
+ifelse(!dir.exists("Output"), dir.create("Output"), "Folder exists already")
+ifelse(!dir.exists("Output/Plots"), dir.create("Output/Plots"), "Folder exists already")
 
-# Load the dataframes for each experiment
+# Load the dataframes for all experiments for one cell line
+# these are rds files found in Output/Data
 datadir <- rstudioapi::selectDirectory()
 my_files <- list.files(datadir,pattern='*.rds',full.names = TRUE)
 combined_df <- bind_rows(lapply(my_files, readRDS))
@@ -21,9 +23,9 @@ combined_df$Category <- as.factor(combined_df$Category)
 # How many cells in each condition?
 summary(combined_df$Category)
 
-# To plot in the correct order, we first need the look-up table
-look_up_table <- read.table("lookup.csv", header = TRUE, stringsAsFactors = F, sep = ",")
-combined_df$Category <- factor(combined_df$Category, levels = look_up_table$Search_category )
+# load external look-up table
+look_up_table <- read.table("Data/lookup.csv", header = TRUE, stringsAsFactors = FALSE, sep = ",")
+combined_df$Category <- factor(combined_df$Category, levels = unique(look_up_table$Search_category) )
 
 # Subsetting the data to remove tubulin and PI3KC2A
 theNames <- rev(names(combined_df))
@@ -79,5 +81,4 @@ p4 <- makeTheScatterPlot("GTSE1 control","GTSE1 rapamycin", "GTSE1", theCellLine
 # arrange the plots, display and save as PDF
 all_scatter_plots <- plot_grid(p1,p2,p3,p4, rel_widths = c(1, 1), rel_heights = c(1,1)) + theme(aspect.ratio=1)
 all_scatter_plots
-ggsave("./output/all_scatter_plots.pdf", plot = all_scatter_plots, width = 120, height = 120, units = 'mm', useDingbats = FALSE)
-#ggsave("./output/all_scatter_plots.png", plot = all_scatter_plots, dpi = 300)
+ggsave(paste0("Output/Plots/all_scatter_plots_",theCellLine,".pdf"), plot = all_scatter_plots, width = 120, height = 120, units = 'mm', useDingbats = FALSE)
