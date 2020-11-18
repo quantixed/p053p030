@@ -41,6 +41,8 @@ Function SpindleQuant()
 		MakeTheLayouts("p3",4,2)
 		MakeTheBiPlots()
 		MakeTheLayouts("p4",6,4)
+		BiPlotsNHST()
+		MakeTheLayouts("p5",4,2)
 	else
 		return -1
 	endif
@@ -562,6 +564,172 @@ STATIC Function GreenRedBiPlots(w0,w1,w2)
 	TextBox/W=$plotName/B=1/C/N=text0/F=0/A=RB/X=0.00/Y=0.00/E=0 labelStr
 End
 
+Function BiPlotsNHST()
+	SetDataFolder root:data:
+	
+	String wList = WaveList("*_bi*",";","")
+	Variable nWaves = ItemsInList(wList)
+	String wName, newPreName, newPostName
+	Variable nRow
+	Variable i
+	
+	for(i = 0; i < nWaves; i += 1)
+		wName = StringFromList(i, wList)
+		Wave w = $wName
+		nRow = numpnts(w) / 3
+		newPreName = RemoveEnding(ReplaceString("_bi",wName,"_NHST"),"0") + "Pre"
+		newPostName = RemoveEnding(ReplaceString("_bi",wName,"_NHST"),"0") + "Post" 
+		Make/O/N=(nRow) $newPreName, $newPostName
+		Wave preW = $newPreName
+		Wave postW = $newPostName
+		preW[] = w[p*3]
+		postW[] = w[p*3 + 1]
+	endfor
+	
+	WAVE/Z/T condAUniqueIgorNames
+	String folderPath
+	Variable nConditions = numpnts(condAUniqueIgorNames)
+	NewDataFolder/O root:stats
+	
+	for(i = 0; i < nConditions; i += 1)
+		folderPath = "root:stats:" + condAUniqueIgorNames[i]
+		NewDataFolder/O $folderPath
+	endfor
+	
+	String channelList = "green;red;"
+	String greenOrRed
+	Variable j
+	
+	for(i = 0; i < nConditions; i += 1)
+		for(j = 0; j < 2; j += 1)
+			greenOrRed = StringFromList(j, channelList)
+			wList = WaveList(condAUniqueIgorNames[i] + "_*_NHST" + greenOrRed + "*",";","")
+			wList = RemoveFromList(WaveList("*tubulin*",";",""),wList)
+			wList = RemoveFromList(WaveList("*ave*",";",""),wList)
+			StatsTukeyTest/SWN/WSTR=wList
+			WAVE/Z M_TukeyTestResults
+			WAVE/Z/T T_TukeyDescriptors
+			folderPath = "root:stats:" + condAUniqueIgorNames[i] + ":" + greenOrRed
+			NewDataFolder/O/S $folderPath
+			MoveWave M_TukeyTestResults, $(folderPath + ":M_TukeyTestResults")
+			MoveWave T_TukeyDescriptors, $(folderPath + ":T_TukeyDescriptors")
+			VizTukeyResults()
+			WAVE/Z/T TR_Labels
+			TR_Labels[] = ReplaceString("_NHST" + greenOrRed,TR_Labels[p],"")
+			SetDataFolder root:data:
+		endfor
+	endfor
+	
+	SetDataFolder root:data:
+	// now do T-Tests
+	wList = WaveList("*_NHST*Pre",";","")
+	wList = RemoveFromList(WaveList("*tubulin*",";",""),wList)
+	wList = RemoveFromList(WaveList("*ave*",";",""),wList)
+	nWaves = ItemsInList(wList)
+	
+	for(i = 0; i < nWaves; i += 1)
+		wName = StringFromList(i, wList)
+		Wave preW = $wName
+		Wave postW = $(ReplaceString("Pre",wName,"Post"))
+		StatsTTest/Q preW, postW
+		WAVE/Z W_StatsTTest
+		Print wName, "p =", W_StatsTTest[%P]
+	endfor
+	
+	SetDataFolder root:
+End
+
+STATIC Function VizTukeyResults()
+	Wave/T/Z T_TukeyDescriptors
+	Wave/Z M_TukeyTestResults
+	if(!WaveExists(T_TukeyDescriptors))
+		abort "Missing Descriptor Wave. Use /SWN."
+	endif
+	if(!WaveExists(M_TukeyTestResults))
+		abort "Missing Tukey Test Results"
+	endif
+	
+	String plotName = GetDataFolder(1)
+	plotName = ReplaceString("root:stats:",plotName,"")
+	plotName = "p5_" + ReplaceString(":",plotName,"_")
+	
+	Variable nRows, nCond
+	String dimLabelName,idName
+	
+	// take dimension labels
+	// Find the input to TukeyTest
+	nRows = DimSize(M_TukeyTestResults,0)
+	// because nCond = (nRows * (nRows - 1)) / 2
+	nCond = SolveQE(1,-1,-nRows * 2)
+	Make/O/N=(nCond) TR_Pos = p
+	Make/FREE/N=(nRows) xVarWave, yVarWave
+	Make/T/FREE/N=(nRows) xStrWave, yStrWave
+	
+	String xStr, yStr
+	Variable xVar,yVar,breakPoint,pVal
+	Make/O/N=(nCond,nCond) TukeyResultMat = NaN
+	
+	Variable i, j
+	
+	for(i = 0; i < nRows; i += 1)
+		dimLabelName = GetDimLabel(M_TukeyTestResults,0,i)
+		breakPoint = strsearch(dimLabelName, "_vs_", 0)
+		xStr = dimLabelName[0,breakPoint-1]
+		yStr = dimLabelName[breakPoint+4,strlen(dimLabelName)-1]
+		xVar = str2num(xStr)
+		yVar = str2num(yStr)
+		pVal = M_TukeyTestResults[i][5]
+		if(pVal == 0)
+			pVal = 1e-24 // set p Value of 0 to something very small
+		endif
+		TukeyResultMat[xVar][yVar] = pVal
+		TukeyResultMat[yVar][xVar] = pVal
+		// put into two temporary waves
+		xVarWave[i] = xVar
+		yVarWave[i] = yVar
+		// real wave names
+		idName = T_TukeyDescriptors[i]
+		breakPoint = strsearch(idName, " vs ", 0)
+		xStr = idName[0,breakPoint-1]
+		yStr = idName[breakPoint+4,strlen(idName)-1]
+		// put into two temporary waves
+		xStrWave[i] = xStr
+		yStrWave[i] = yStr
+	endfor
+	
+	// concatenate the x and y versions of values and strings
+	Concatenate/O/NP=0 {xVarWave,yVarWave}, allVarWave
+	Concatenate/O/NP=0 {xStrWave,yStrWave}, allStrWave
+	// sort so we get out a list of waves 0 to nCond
+	Sort allVarWave, allVarWave,allStrWave
+	FindDuplicates/RT=TR_Labels allStrWave
+	
+	KillWindow/Z $plotName
+	NewImage/N=$plotName TukeyResultMat
+	ModifyImage/W=$plotName TukeyResultMat ctab= {*,*,Rainbow,0}
+	
+	ModifyImage/W=$plotName TukeyResultMat ctab= {1e-24,0.5,Rainbow,0},minRGB=(52428,52428,52428),maxRGB=(52428,52428,52428)
+	ModifyGraph/W=$plotName userticks(left)={TR_Pos,TR_Labels}
+	ModifyGraph/W=$plotName userticks(top)={TR_Pos,TR_Labels}
+	ModifyGraph/W=$plotName tick=3,tkLblRot(left)=0,tkLblRot(top)=90,tlOffset=0
+	ModifyGraph/W=$plotName margin(left)=60,margin(top)=60
+	
+	// Add p-Values
+	String textName,labelValStr
+	Duplicate/O TukeyResultMat,TukeyResultVal
+	Variable matsize = numpnts(TukeyResultMat)
+	Redimension/N=(matsize) TukeyResultVal
+	DoWindow/F result
+	for(i = 0; i < matsize; i += 1)
+		if(TukeyResultVal[i] < 0.05)
+			textName = "text" + num2str(i)
+			labelValStr = num2str(Rounder(TukeyResultMat[i],2))
+			Tag/C/N=$textName/F=0/B=1/X=0.00/Y=0.00/L=0 TukeyResultMat, i, labelValStr
+		endif
+	endfor
+	ModifyGraph/W=$plotName width={Plan,1,top,left}
+End
+
 ////////////////////////////////////////////////////////////////////////
 // Utility functions
 ////////////////////////////////////////////////////////////////////////
@@ -683,6 +851,24 @@ STATIC Function CleanSlate()
 		name = GetIndexedObjNameDFR(dfr, 4, i)
 		KillDataFolder $name		
 	endfor
+End
+
+///	@param	a				ax^2 + bx + c
+///	@param	b				ax^2 + bx + c
+///	@param	c				ax^2 + bx + c
+STATIC Function SolveQE(a,b,c)
+	Variable a,b,c
+	return (-b + sqrt(1 - (4 * (a * c))))/(2 * a)
+End
+
+///	@param	value				this is the input value that requires rounding
+///	@param	numSigDigits		number of significant digits for the rounding procedure
+STATIC Function Rounder(value, numSigDigits)
+	Variable value, numSigDigits
+ 
+	String str
+	Sprintf str, "%.*g\r", numSigDigits, value
+	return str2num(str)
 End
 
 // Notes:
