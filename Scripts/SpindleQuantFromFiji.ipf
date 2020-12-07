@@ -8,6 +8,7 @@
 
 Menu "Macros"
 	"Spindle Quantification...",  SpindleQuant()
+	"Export Data to R...", ExportDataToR()
 End
 
 ////////////////////////////////////////////////////////////////////////
@@ -631,7 +632,7 @@ Function BiPlotsNHST()
 		wName = StringFromList(i, wList)
 		Wave preW = $wName
 		Wave postW = $(ReplaceString("Pre",wName,"Post"))
-		StatsTTest/Q preW, postW
+		StatsTTest/Q/PAIR preW, postW
 		WAVE/Z W_StatsTTest
 		Print wName, "p =", W_StatsTTest[%P]
 	endfor
@@ -728,6 +729,41 @@ STATIC Function VizTukeyResults()
 		endif
 	endfor
 	ModifyGraph/W=$plotName width={Plan,1,top,left}
+End
+
+Function ExportDataToR()
+	SetDataFolder root:data:
+	String wList = WaveList("*_NHSTRedPre",";","")
+	wList = RemoveFromList(WaveList("*tubulin*",";",""),wList)
+	wList = RemoveFromList(WaveList("*ave*",";",""),wList)
+	Variable nWaves = ItemsInList(wList)
+	String expr = "([[:alnum:]]+)\\w([[:alnum:]]+)\\w([[:alnum:]]+)"
+	String cell, stain, nhst
+	String wName
+	Variable nRow
+	
+	Variable i
+	
+	for(i = 0; i < nWaves; i += 1)
+		wName = StringFromList(i, wList)
+		Wave preW = $wName
+		Wave postW = $(ReplaceString("Pre",wName,"Post"))
+		SplitString/E=expr wName, cell, stain, nhst
+		nRow = numpnts(preW)
+		// export ID, cell_stain_pre/post, Red measurement
+		Make/O/N=(nRow)/FREE id = p
+		Make/O/N=(nRow)/T/FREE groupPre = cell + "_" + stain + "_pre"
+		Make/O/N=(nRow)/T/FREE groupPost = cell + "_" + stain + "_post"
+		Concatenate/O/NP=1 {id,preW}, preMat
+		Concatenate/O/NP=1 {id,postW}, postMat
+		Concatenate/O/KILL/NP=0 {preMat,postMat}, $("exportMat_" + num2str(i))
+		Concatenate/O/KILL/NP=0/T {groupPre,groupPost}, $("exportLabel_" + num2str(i))
+	endfor
+	Concatenate/O/KILL/NP=0 WaveList("exportMat_*",";",""), bigMat
+	Concatenate/O/KILL/NP=0/T WaveList("exportLabel_*",";",""), bigLabel
+	Save/J/M="\n"/O/F/P=expDiskFolder bigLabel as "bigLabel.txt"
+	Save/J/M="\n"/O/F/P=expDiskFolder bigMat as "bigMat.txt"
+	SetDataFolder root:
 End
 
 ////////////////////////////////////////////////////////////////////////
