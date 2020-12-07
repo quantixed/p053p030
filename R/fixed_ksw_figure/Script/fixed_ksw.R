@@ -8,6 +8,7 @@ library(dplyr)
 library(multcomp)
 library(scales)
 library(cowplot)
+library(dabestr)
 
 # make directory for plots if it doesn't exist (it should)
 ifelse(!dir.exists("Output"), dir.create("Output"), "Folder exists already")
@@ -29,28 +30,23 @@ combined_df$Category <- factor(combined_df$Category, levels = unique(look_up_tab
 
 # Subsetting the data to remove tubulin and PI3KC2A
 theNames <- rev(names(combined_df))
-theNames <- theNames[1:4]
+theNames <- theNames[1:12]
 combined_df <- subset(combined_df, Category != "tubulin control", select = theNames)
 combined_df <- subset(combined_df, Category != "PI3KC2A control", select = theNames)
 combined_df <- subset(combined_df, Category != "tubulin rapamycin", select = theNames)
 combined_df <- subset(combined_df, Category != "PI3KC2A rapamycin", select = theNames)
+combined_df <- subset(combined_df, Category != "chTOG control", select = theNames)
+combined_df <- subset(combined_df, Category != "chTOG rapamycin", select = theNames)
 # combined_df should have these names, but earlier script named 3rd column differently
-names(combined_df) <- c("Category","blind_list","GFP_spindle_ratio","POI_spindle_ratio")
-
-## Statistics
-the_ANOVA <- aov(GFP_spindle_ratio ~ Category, combined_df)
-summary(the_ANOVA)
-plot(the_ANOVA,1)
-plot(the_ANOVA,2)
-summary(glht(the_ANOVA, linfct = mcp(Category='Tukey')))
+names(combined_df) <- c("Experiment_number","Category","blind_list","GFP_spindle_ratio","POI_spindle_ratio", 'reference_spindle_ratio', 'GFP_cytoplasm_means', 'POI_cytoplasm_means', 'reference_cytoplasm_means', 'GFP_spindle_means', 'POI_spindle_means', 'reference_spindle_means')
 
 ## Generating the plot
 # we need to know the name of the cell line
 theCellLine <- basename(datadir)
 
 # find the min and max of the dataframe
-loVal <- min(combined_df[,3:4], na.rm=T)
-hiVal <- max(combined_df[,3:4], na.rm=T)
+loVal <- min(combined_df[,4:5], na.rm=T)
+hiVal <- max(combined_df[,4:5], na.rm=T)
 
 # we want symmetry about 1
 findAxisLimit <- function(val1,val2){
@@ -75,10 +71,29 @@ makeTheScatterPlot <- function(preData, postData, yLab, xLab) {
 # make each of the four plots
 p1 <- makeTheScatterPlot("CHC control","CHC rapamycin", "CHC", theCellLine)
 p2 <- makeTheScatterPlot("TACC3 control","TACC3 rapamycin", "TACC3", theCellLine)
-p3 <- makeTheScatterPlot("chTOG control","chTOG rapamycin", "chTOG", theCellLine)
+p3 <- makeTheScatterPlot("chTOG Thermo control","chTOG Thermo rapamycin", "new chTOG", theCellLine)
 p4 <- makeTheScatterPlot("GTSE1 control","GTSE1 rapamycin", "GTSE1", theCellLine)
 
 # arrange the plots, display and save as PDF
 all_scatter_plots <- plot_grid(p1,p2,p3,p4, rel_widths = c(1, 1), rel_heights = c(1,1)) + theme(aspect.ratio=1)
 all_scatter_plots
 ggsave(paste0("Output/Plots/all_scatter_plots_",theCellLine,".pdf"), plot = all_scatter_plots, width = 120, height = 120, units = 'mm', useDingbats = FALSE)
+
+# ------------------- dabest ----------------------
+
+data.unpaired <- 
+  combined_df %>%
+  dabest(Category, POI_spindle_ratio, 
+         idx = list(c("CHC control","CHC rapamycin"),
+                    c("TACC3 control","TACC3 rapamycin"),
+                    c("chTOG Thermo control","chTOG Thermo rapamycin"),
+                    c("GTSE1 control","GTSE1 rapamycin")),
+         paired = FALSE
+  )
+data.unpaired.mean_diff <- mean_diff(data.unpaired)
+pdf(file=paste0("Output/Plots/dabest_",theCellLine,".pdf"))
+plot(data.unpaired.mean_diff)
+dev.off()
+sink(paste0("Output/Data/dabest_",theCellLine,".txt"))
+print(data.unpaired.mean_diff)
+sink()
