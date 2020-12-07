@@ -14,6 +14,9 @@ datadir <- rstudioapi::selectDirectory()
 my_files <- list.files(datadir, pattern = "*.csv", full.names = TRUE)
 my_files_names <- list.files(datadir, pattern = "*.csv")
 
+# Extract the experiment number (will be used later). Useful for combining data from multiple experiments
+Experiment_number <- basename(datadir)
+
 # base R is used to pull in all the data
 my_matrix <- matrix(0, length(my_files), 21)
 
@@ -119,6 +122,9 @@ df1$Category <- with(blind_log,
 # needs to be done like this because
 # a) blind_log is in a random order
 # b) your list of *.csv names could be in any order (although they're probably sorted alphanumerically)
+
+# Add the experiment number to the df
+df1$Experiment_number <- Experiment_number
 
 cellLineName <- basename(dirname(datadir))
 pathToDataSave <-  paste0("Output/Data/", cellLineName, "/")

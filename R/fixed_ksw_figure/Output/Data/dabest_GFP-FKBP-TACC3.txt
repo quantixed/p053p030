@@ -1,0 +1,26 @@
+dabestr (Data Analysis with Bootstrap Estimation in R) v0.3.0
+=============================================================
+
+Good evening!
+The current time is 19:19 PM on Monday December 07, 2020.
+
+Dataset    :  .
+X Variable :  Category
+Y Variable :  POI_spindle_ratio
+
+Unpaired mean difference of CHC rapamycin (n = 20) minus CHC control (n = 16)
+ -0.136 [95CI  -0.708; 0.375]
+
+Unpaired mean difference of TACC3 rapamycin (n = 19) minus TACC3 control (n = 16)
+ -1.06 [95CI  -1.94; -0.267]
+
+Unpaired mean difference of chTOG Thermo rapamycin (n = 18) minus chTOG Thermo control (n = 19)
+ -1.19 [95CI  -1.47; -0.94]
+
+Unpaired mean difference of GTSE1 rapamycin (n = 17) minus GTSE1 control (n = 15)
+ -0.248 [95CI  -0.62; 0.128]
+
+
+5000 bootstrap resamples.
+All confidence intervals are bias-corrected and accelerated.
+

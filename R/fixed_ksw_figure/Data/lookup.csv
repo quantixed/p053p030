@@ -21,3 +21,15 @@ _tubulin_tubulin_control,tubulin control
 _tubulin_tubulin_rapamycin,tubulin rapamycin
 KC2A_tubulin_control,PI3KC2A control
 KC2A_tubulin_rapamycin,PI3KC2A rapamycin
+_control_CLTA,CHC control
+rapamycin_CLTA,CHC rapamycin
+rapamycin_Clathrin,CHC rapamycin
+control_Clathrin,CHC control
+_control_TACC3,TACC3 control
+rapamycin_TACC3,TACC3 rapamycin
+_control_chTOG,chTOG Thermo control
+rapamycin_chTOG,chTOG Thermo rapamycin
+_control_GTSE1,GTSE1 control
+rapamycin_GTSE1,GTSE1 rapamycin
+chTOGthermo_control,chTOG Thermo control
+chTOGthermo_rapamycin,chTOG Thermo rapamycin
