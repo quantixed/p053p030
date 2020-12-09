@@ -56,6 +56,8 @@ findAxisLimit <- function(val1,val2){
   return(highVal)
 }
 axVal <- findAxisLimit(loVal,hiVal)
+# this worked well but since we generate separate groups of plots per cell line, we need a uniform look
+axVal <- 4
 
 # function to generate the plots
 makeTheScatterPlot <- function(preData, postData, yLab, xLab) {
@@ -71,7 +73,7 @@ makeTheScatterPlot <- function(preData, postData, yLab, xLab) {
 # make each of the four plots
 p1 <- makeTheScatterPlot("CHC control","CHC rapamycin", "CHC", theCellLine)
 p2 <- makeTheScatterPlot("TACC3 control","TACC3 rapamycin", "TACC3", theCellLine)
-p3 <- makeTheScatterPlot("chTOG Thermo control","chTOG Thermo rapamycin", "new chTOG", theCellLine)
+p3 <- makeTheScatterPlot("chTOG Thermo control","chTOG Thermo rapamycin", "chTOG", theCellLine)
 p4 <- makeTheScatterPlot("GTSE1 control","GTSE1 rapamycin", "GTSE1", theCellLine)
 
 # arrange the plots, display and save as PDF
