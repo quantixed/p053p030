@@ -106,16 +106,24 @@ Function CalculateTimings(rate)
 		Make/O/N=(nCell) $newName
 		Wave w1 = $newName
 		w1[] = (w0[p][1] - w0[p][0]) * rate
+		w1[] = (w1[p] < 0) ? NaN : w1[p] // correct any negative values
 		// metaphase-to-anaphase
 		newName = ReplaceString("_frames",wName,"_MA")
 		Make/O/N=(nCell) $newName
 		Wave w1 = $newName
 		w1[] = (w0[p][2] - w0[p][1]) * rate
+		w1[] = (w1[p] < 0) ? NaN : w1[p]
 		// NEB-to-anaphase
 		newName = ReplaceString("_frames",wName,"_NA")
 		Make/O/N=(nCell) $newName
 		Wave w1 = $newName
 		w1[] = (w0[p][2] - w0[p][0]) * rate
+		w1[] = (w1[p] < 0) ? NaN : w1[p]
+		// Make 1D wave of NEB onset (used for plotting durations vs onset)
+		newName = ReplaceString("_frames",wName,"_onset")
+		Make/O/N=(nCell) $newName
+		Wave w1 = $newName
+		w1[] = w0[p][0] * rate
 	endfor
 End
 
@@ -135,7 +143,8 @@ Function MakeHistograms()
 	LayoutPageAction/W=summaryLayout size(-1)=(595, 842), margins(-1)=(18, 18, 18, 18)
 	
 	Variable maxLength = 0
-	String legendStr = ""
+	String legendStr = "", labelStr = ""
+	Variable normVar
 	
 	Variable i,j
 	
@@ -156,14 +165,23 @@ Function MakeHistograms()
 			wName = condWave[j] + "_" + StringFromList(i,plotList)
 			Wave w0 = $wName
 			histName = wName + "_hist"
-			Make/O/N=(ceil((maxLength + 1) / 3)) $histName
-			Histogram/CUM/P/B={0,3,ceil((maxLength + 1) / 3)} w0,$histName
+			Make/O/N=(ceil((maxLength) / 3) + 2) $histName
+//			Histogram/CUM/P/B={0,3,ceil((maxLength + 1) / 3)} w0,$histName
+			Histogram/CUM/B={0,3,ceil((maxLength) / 3) + 2} w0,$histName
+			Wave w1 = $histName
+//			normVar = WaveMax(w1) // this normalises to max of cumHist
+			normVar = numpnts(w0)
+			w1 /= normVar
 			AppendToGraph/W=$plotName $histName
 			ModifyGraph/W=$plotName rgb($histName)=(colorWave[j][0],colorWave[j][1],colorWave[j][2],colorWave[j][3])
 			if(j > 0)
 				legendStr += "\r"
 			endif
 			legendStr += "\\s(" + histName + ") " + condWave[j]
+			// add to labelStr
+			labelStr += "\r" + NameOfWave(w0) + " progression: " + num2str(w1[numpnts(w1) - 1]) + " for " + num2str(normVar) + "cells."
+			FindLevel/Q w1, (w1[numpnts(w1) - 1] * 0.5)
+			labelStr += "T-half: " + num2str(V_LevelX)
 		endfor
 		FormatHisto(plotName, legendStr, StringFromList(i,labelList))
 		AppendLayoutObject/W=summaryLayout graph $plotName
@@ -186,10 +204,34 @@ Function MakeHistograms()
 	// lengendStr should still be correct
 	FormatHisto(plotName, legendStr, "")
 	AppendLayoutObject/W=summaryLayout graph $plotName
+	
+	// now add duration vs onset
+	for(i = 0; i < nPlots; i += 1)
+		plotname = "q_" + StringFromList(i,plotList)
+		KillWindow/Z $plotName
+		Display/N=$plotName
+		
+		for(j = 0; j < nCond; j += 1)
+			wName = condWave[j] + "_" + StringFromList(i,plotList)
+			AppendToGraph/W=$plotName $wName vs $(condWave[j] + "_onset")
+			ModifyGraph/W=$plotName rgb($wName)=(colorWave[j][0],colorWave[j][1],colorWave[j][2],colorWave[j][3])
+		endfor
+		ModifyGraph/W=$plotName mode=3,marker=19,mrkThick=0
+		SetAxis/W=$plotName/A/N=1/E=1 left
+		SetAxis/W=$plotName/A/N=1/E=1 bottom
+		Label/W=$plotName left "Duration (min)"
+		Label/W=$plotName bottom "Onset (min)"
+		TextBox/W=$plotName/C/N=text0/F=0/S=3/A=RT/X=0.00/Y=0.00 StringFromList(i,labelList)
+		AppendLayoutObject/W=summaryLayout graph $plotName
+	endfor
+	
+	
 	// format layout
 	ModifyLayout/W=summaryLayout units=0
 	ModifyLayout/W=summaryLayout frame=0,trans=1
 	Execute /Q "Tile/A=(6,3)"
+	
+	TextBox/W=summaryLayout/C/N=text0/F=0/A=LB/X=0.00/Y=0.00 labelStr
 End
 
 STATIC Function FormatHisto(plotName, legendStr, labelStr)
