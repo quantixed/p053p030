@@ -1,11 +1,11 @@
 # p053p030
-Code and data for Ryan & Shelford et al. manuscript`#p053p030`
+Code and data for Ryan & Shelford et al. manuscript `#p053p030`
 
 **Defining endogenous TACC3–chTOG–clathrin–GTSE1 interactions at the mitotic spindle using induced relocalization**
 
 Ellis L Ryan^, James Shelford^, Teresa Massam-Wu, Richard Bayliss, Stephen J Royle
 
-*bioRxiv* [2020.07.01.181818](https://doi.org/10.1101/2020.07.01.181818)
+*J. Cell Sci.* (2021) 134(3): jcs255794 [10.1242/jcs.255794](https://doi.org/10.1242/jcs.255794)
 
 ## Data
 
